@@ -8,6 +8,8 @@ type StudioProps = {
 }
 
 export function Studio({ content }: StudioProps) {
+  const hasCta = content.ctaLabel.trim().length > 0 && content.ctaLabel !== "Learn More"
+
   return (
     <section id="studio" className="py-32 bg-secondary">
       <div className="px-6 md:px-12 lg:px-20">
@@ -20,12 +22,14 @@ export function Studio({ content }: StudioProps) {
               {content.title}
             </h2>
           </div>
-          <Link
-            href="#"
-            className="hidden md:block text-xs tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors uppercase border-b border-muted-foreground hover:border-foreground pb-1"
-          >
-            {content.ctaLabel}
-          </Link>
+          {hasCta ? (
+            <Link
+              href="#studio"
+              className="hidden md:block text-xs tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors uppercase border-b border-muted-foreground hover:border-foreground pb-1"
+            >
+              {content.ctaLabel}
+            </Link>
+          ) : null}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
@@ -59,14 +63,16 @@ export function Studio({ content }: StudioProps) {
           </div>
         </div>
 
-        <div className="mt-16 lg:hidden text-center">
-          <Link
-            href="#"
-            className="text-xs tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors uppercase border-b border-muted-foreground hover:border-foreground pb-1"
-          >
-            {content.ctaLabel}
-          </Link>
-        </div>
+        {hasCta ? (
+          <div className="mt-16 lg:hidden text-center">
+            <Link
+              href="#studio"
+              className="text-xs tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors uppercase border-b border-muted-foreground hover:border-foreground pb-1"
+            >
+              {content.ctaLabel}
+            </Link>
+          </div>
+        ) : null}
       </div>
     </section>
   )

@@ -134,6 +134,8 @@ export function AdminDashboard({ initialContent, userEmail }: Props) {
     setContent({ ...content, contact: { ...content.contact, socialLinks } })
   }
 
+  const visibleProjectCount = Math.min(content.projects.items.length, 5)
+
   return (
     <main className="min-h-screen bg-[linear-gradient(180deg,#f7f3ec,#ffffff)] px-6 py-8 md:px-12 lg:px-20">
       <div className="mx-auto max-w-7xl">
@@ -165,11 +167,38 @@ export function AdminDashboard({ initialContent, userEmail }: Props) {
           </div>
         </div>
 
-        {message ? <p className="mb-6 text-sm text-emerald-700">{message}</p> : null}
-        {error ? <p className="mb-6 text-sm text-red-600">{error}</p> : null}
+        <div className="sticky top-20 z-30 mb-8 rounded-2xl border border-border bg-background/95 p-4 shadow-sm backdrop-blur">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-wrap gap-2">
+              {[
+                ["site-settings", "Site"],
+                ["hero", "Hero"],
+                ["projects", "Projects"],
+                ["studio", "Studio"],
+                ["news", "News"],
+                ["contact", "Contact"],
+              ].map(([id, label]) => (
+                <Link
+                  key={id}
+                  href={`#${id}`}
+                  className="rounded-full border border-border px-3 py-2 text-xs uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
+                >
+                  {label}
+                </Link>
+              ))}
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              {message ? <p className="text-sm text-emerald-700">{message}</p> : null}
+              {error ? <p className="text-sm text-red-600">{error}</p> : null}
+              <Button type="button" onClick={saveContent} disabled={isSaving}>
+                {isSaving ? "Saving..." : "Save Changes"}
+              </Button>
+            </div>
+          </div>
+        </div>
 
         <div className="grid gap-6">
-          <Card>
+          <Card id="site-settings" className="scroll-mt-32">
             <CardHeader>
               <CardTitle>Site Settings</CardTitle>
               <CardDescription>Brand and footer text used across the site.</CardDescription>
@@ -200,7 +229,7 @@ export function AdminDashboard({ initialContent, userEmail }: Props) {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card id="hero" className="scroll-mt-32">
             <CardHeader>
               <CardTitle>Hero</CardTitle>
               <CardDescription>Homepage image and overlay text.</CardDescription>
@@ -257,12 +286,21 @@ export function AdminDashboard({ initialContent, userEmail }: Props) {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card id="projects" className="scroll-mt-32">
             <CardHeader>
               <CardTitle>Projects</CardTitle>
-              <CardDescription>Add, remove, and edit all project cards.</CardDescription>
+              <CardDescription>
+                Add, remove, and edit all project cards. The homepage currently highlights the
+                first {visibleProjectCount} project{visibleProjectCount === 1 ? "" : "s"}.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              {content.projects.items.length > 5 ? (
+                <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                  {content.projects.items.length} projects are saved, but the homepage currently
+                  displays the first 5. Extra projects are still reachable on their own detail pages.
+                </div>
+              ) : null}
               <div className="grid gap-4 md:grid-cols-3">
                 <Field label="Eyebrow">
                   <Input
@@ -497,7 +535,7 @@ export function AdminDashboard({ initialContent, userEmail }: Props) {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card id="studio" className="scroll-mt-32">
             <CardHeader>
               <CardTitle>Studio</CardTitle>
               <CardDescription>Edit the main studio section and its content blocks.</CardDescription>
@@ -640,7 +678,7 @@ export function AdminDashboard({ initialContent, userEmail }: Props) {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card id="news" className="scroll-mt-32">
             <CardHeader>
               <CardTitle>News</CardTitle>
               <CardDescription>Manage the homepage news list and links.</CardDescription>
@@ -755,7 +793,7 @@ export function AdminDashboard({ initialContent, userEmail }: Props) {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card id="contact" className="scroll-mt-32">
             <CardHeader>
               <CardTitle>Contact</CardTitle>
               <CardDescription>Change the website contact section and social links.</CardDescription>

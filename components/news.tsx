@@ -11,6 +11,7 @@ type NewsProps = {
 
 export function News({ content }: NewsProps) {
   const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const hasNewsListing = content.items.some((item) => item.href && item.href !== "#")
 
   return (
     <section id="news" className="py-32 px-6 md:px-12 lg:px-20">
@@ -23,12 +24,11 @@ export function News({ content }: NewsProps) {
             {content.title}
           </h2>
         </div>
-        <Link
-          href="#"
-          className="hidden md:block text-xs tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors uppercase border-b border-muted-foreground hover:border-foreground pb-1"
-        >
-          {content.ctaLabel}
-        </Link>
+        {hasNewsListing ? (
+          <span className="hidden md:block text-xs tracking-[0.2em] text-muted-foreground uppercase border-b border-muted-foreground pb-1">
+            {content.ctaLabel}
+          </span>
+        ) : null}
       </div>
 
       <div className="border-t border-border">
@@ -70,14 +70,13 @@ export function News({ content }: NewsProps) {
         ))}
       </div>
 
-      <div className="mt-12 md:hidden text-center">
-        <Link
-          href="#"
-          className="text-xs tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors uppercase border-b border-muted-foreground hover:border-foreground pb-1"
-        >
-          {content.ctaLabel}
-        </Link>
-      </div>
+      {hasNewsListing ? (
+        <div className="mt-12 md:hidden text-center">
+          <span className="text-xs tracking-[0.2em] text-muted-foreground uppercase border-b border-muted-foreground pb-1">
+            {content.ctaLabel}
+          </span>
+        </div>
+      ) : null}
     </section>
   )
 }
