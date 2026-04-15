@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { createClient as createSupabaseBrowserClient } from "@/lib/supabase/client"
 import type { SiteContent } from "@/lib/site-content"
 
 type Props = {
@@ -32,7 +31,6 @@ export function AdminDashboard({ initialContent, userEmail }: Props) {
   const [uploadingField, setUploadingField] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createSupabaseBrowserClient()
 
   async function saveContent() {
     setIsSaving(true)
@@ -66,27 +64,28 @@ export function AdminDashboard({ initialContent, userEmail }: Props) {
     setError(null)
     setMessage(null)
 
-    const filePath = `${folder}/${Date.now()}-${sanitizeFileName(file.name)}`
-    const { error: uploadError } = await supabase.storage
-      .from(STORAGE_BUCKET)
-      .upload(filePath, file, {
-        cacheControl: "3600",
-        upsert: false,
-      })
+    const formData = new FormData()
+    formData.append("file", file)
+    formData.append("folder", folder)
 
-    if (uploadError) {
+    const response = await fetch("/api/admin/upload-image", {
+      method: "POST",
+      body: formData,
+    })
+
+    const payload = (await response.json().catch(() => null)) as
+      | { error?: string; url?: string }
+      | null
+
+    if (!response.ok || !payload?.url) {
       setUploadingField(null)
-      setError(uploadError.message)
+      setError(payload?.error || "Unable to upload image.")
       return null
     }
 
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(filePath)
-
     setUploadingField(null)
     setMessage("Image uploaded. Save changes to publish it on the website.")
-    return publicUrl
+    return payload.url
   }
 
   function updateProject(
