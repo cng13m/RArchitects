@@ -6,14 +6,55 @@ export const linkSchema = z.object({
   href: z.string().min(1),
 })
 
-export const projectSchema = z.object({
+export const projectGalleryItemSchema = z.object({
   id: z.string().min(1),
-  title: z.string().min(1),
-  location: z.string().min(1),
-  year: z.string().min(1),
   image: z.string().min(1),
-  href: z.string().min(1),
+  title: z.string().min(1).default("Project image"),
+  description: z.string().min(1).default(""),
 })
+
+export const projectSchema = z
+  .object({
+    id: z.string().min(1),
+    slug: z.string().min(1).optional(),
+    title: z.string().min(1),
+    location: z.string().min(1),
+    year: z.string().min(1),
+    image: z.string().min(1),
+    href: z.string().min(1).optional(),
+    summary: z.string().optional(),
+    description: z.string().optional(),
+    gallery: z.array(projectGalleryItemSchema).optional(),
+  })
+  .transform((project) => {
+    const slug = project.slug || project.id
+    const summary =
+      project.summary ||
+      `${project.title} is a residential architecture project located in ${project.location}.`
+    const description =
+      project.description ||
+      `${project.title} explores material warmth, site sensitivity, and a calm relationship between interior and landscape.`
+    const gallery =
+      project.gallery && project.gallery.length > 0
+        ? project.gallery
+        : [
+            {
+              id: `${project.id}-gallery-1`,
+              image: project.image,
+              title: project.title,
+              description: summary,
+            },
+          ]
+
+    return {
+      ...project,
+      slug,
+      href: `/projects/${slug}`,
+      summary,
+      description,
+      gallery,
+    }
+  })
 
 export const studioValueSchema = z.object({
   id: z.string().min(1),
@@ -90,44 +131,110 @@ export const defaultSiteContent: SiteContent = {
     ctaLabel: "View All Projects",
     items: [
       {
-        id: "project-1",
+        id: "house-on-the-cliff",
+        slug: "house-on-the-cliff",
         title: "House on the Cliff",
         location: "Costa Brava, Spain",
         year: "2024",
         image: "/images/project-cliff-house.jpg",
-        href: "#",
+        href: "/projects/house-on-the-cliff",
+        summary: "A dramatic coastal home shaped by sea views, stone terraces, and restrained modern detailing.",
+        description:
+          "This project balances shelter and openness along a rugged cliffside, using long horizontal lines, tactile stone surfaces, and framed views of the Mediterranean.",
+        gallery: [
+          {
+            id: "cliff-1",
+            image: "/images/project-cliff-house.jpg",
+            title: "Arrival facade",
+            description: "A low horizontal approach introduces the house as an extension of the cliff.",
+          },
+          {
+            id: "cliff-2",
+            image: "/images/project-coastal-villa.jpg",
+            title: "Sea-facing terrace",
+            description: "Outdoor living spaces step down toward the water and capture changing light.",
+          },
+        ],
       },
       {
-        id: "project-2",
+        id: "villa-lago",
+        slug: "villa-lago",
         title: "Villa Lago",
         location: "Lake Como, Italy",
         year: "2024",
         image: "/images/project-lake-villa.jpg",
-        href: "#",
+        href: "/projects/villa-lago",
+        summary: "A quiet lakefront residence composed around reflection, landscape, and soft natural materials.",
+        description:
+          "Villa Lago uses terraces, courtyards, and continuous glazing to connect interior life to the lake edge while maintaining a calm, intimate atmosphere.",
+        gallery: [
+          {
+            id: "lago-1",
+            image: "/images/project-lake-villa.jpg",
+            title: "Lakeside elevation",
+            description: "The primary facade opens gently to the water with deep overhangs and stone planes.",
+          },
+        ],
       },
       {
-        id: "project-3",
+        id: "desert-pavilion",
+        slug: "desert-pavilion",
         title: "Desert Pavilion",
         location: "Scottsdale, Arizona",
         year: "2023",
         image: "/images/project-desert-house.jpg",
-        href: "#",
+        href: "/projects/desert-pavilion",
+        summary: "A desert retreat shaped by shade, thermal mass, and long views across the landscape.",
+        description:
+          "This pavilion responds to the harsh climate with thick walls, shaded outdoor rooms, and a palette that sits naturally within the desert context.",
+        gallery: [
+          {
+            id: "desert-1",
+            image: "/images/project-desert-house.jpg",
+            title: "Courtyard approach",
+            description: "Protected outdoor rooms offer shade and privacy within a stark climate.",
+          },
+        ],
       },
       {
-        id: "project-4",
+        id: "forest-retreat",
+        slug: "forest-retreat",
         title: "Forest Retreat",
         location: "Aspen, Colorado",
         year: "2023",
         image: "/images/project-forest-retreat.jpg",
-        href: "#",
+        href: "/projects/forest-retreat",
+        summary: "A timber retreat immersed in woodland, designed around texture, warmth, and seasonal change.",
+        description:
+          "The house opens selectively to the forest, using natural materials and carefully framed openings to create a calm, restorative atmosphere.",
+        gallery: [
+          {
+            id: "forest-1",
+            image: "/images/project-forest-retreat.jpg",
+            title: "Forest-facing volume",
+            description: "A restrained silhouette allows the retreat to sit quietly among the trees.",
+          },
+        ],
       },
       {
-        id: "project-5",
+        id: "coastal-villa",
+        slug: "coastal-villa",
         title: "Coastal Villa",
         location: "Marbella, Spain",
         year: "2023",
         image: "/images/project-coastal-villa.jpg",
-        href: "#",
+        href: "/projects/coastal-villa",
+        summary: "A bright Mediterranean home with layered terraces and fluid indoor-outdoor living.",
+        description:
+          "The project uses softened geometry, pale materials, and cross-ventilated spaces to create an elegant but highly livable coastal residence.",
+        gallery: [
+          {
+            id: "coastal-1",
+            image: "/images/project-coastal-villa.jpg",
+            title: "Main terrace",
+            description: "Terraces extend the living spaces outward and soften the transition to the garden.",
+          },
+        ],
       },
     ],
   },

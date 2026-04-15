@@ -91,11 +91,24 @@ export function AdminDashboard({ initialContent, userEmail }: Props) {
 
   function updateProject(
     index: number,
-    field: "title" | "location" | "year" | "image" | "href",
+    field: "slug" | "title" | "location" | "year" | "image" | "href" | "summary" | "description",
     value: string,
   ) {
     const items = [...content.projects.items]
     items[index] = { ...items[index], [field]: value }
+    setContent({ ...content, projects: { ...content.projects, items } })
+  }
+
+  function updateProjectGalleryItem(
+    projectIndex: number,
+    galleryIndex: number,
+    field: "image" | "title" | "description",
+    value: string,
+  ) {
+    const items = [...content.projects.items]
+    const gallery = [...items[projectIndex].gallery]
+    gallery[galleryIndex] = { ...gallery[galleryIndex], [field]: value }
+    items[projectIndex] = { ...items[projectIndex], gallery }
     setContent({ ...content, projects: { ...content.projects, items } })
   }
 
@@ -302,6 +315,12 @@ export function AdminDashboard({ initialContent, userEmail }: Props) {
                     }
                   >
                     <div className="grid gap-4 md:grid-cols-2">
+                      <Field label="Slug">
+                        <Input
+                          value={project.slug}
+                          onChange={(event) => updateProject(index, "slug", event.target.value)}
+                        />
+                      </Field>
                       <Field label="Title">
                         <Input
                           value={project.title}
@@ -338,6 +357,103 @@ export function AdminDashboard({ initialContent, userEmail }: Props) {
                           onChange={(event) => updateProject(index, "href", event.target.value)}
                         />
                       </Field>
+                      <Field label="Summary">
+                        <Textarea
+                          className="min-h-24"
+                          value={project.summary}
+                          onChange={(event) => updateProject(index, "summary", event.target.value)}
+                        />
+                      </Field>
+                      <Field label="Project description">
+                        <Textarea
+                          className="min-h-32"
+                          value={project.description}
+                          onChange={(event) =>
+                            updateProject(index, "description", event.target.value)
+                          }
+                        />
+                      </Field>
+                    </div>
+                    <div className="mt-6 space-y-4">
+                      <h4 className="text-sm font-medium">Project gallery</h4>
+                      {project.gallery.map((galleryItem, galleryIndex) => (
+                        <EditableCard
+                          key={galleryItem.id}
+                          title={`Gallery Image ${galleryIndex + 1}`}
+                          onRemove={() => {
+                            const items = [...content.projects.items]
+                            items[index] = {
+                              ...items[index],
+                              gallery: items[index].gallery.filter((item) => item.id !== galleryItem.id),
+                            }
+                            setContent({ ...content, projects: { ...content.projects, items } })
+                          }}
+                        >
+                          <div className="grid gap-4 md:grid-cols-2">
+                            <Field label="Image">
+                              <ImageField
+                                fieldId={`project-gallery-${galleryItem.id}`}
+                                folder="projects"
+                                value={galleryItem.image}
+                                uploadingField={uploadingField}
+                                onChange={(value) =>
+                                  updateProjectGalleryItem(index, galleryIndex, "image", value)
+                                }
+                                onUpload={uploadImage}
+                              />
+                            </Field>
+                            <Field label="Image title">
+                              <Input
+                                value={galleryItem.title}
+                                onChange={(event) =>
+                                  updateProjectGalleryItem(
+                                    index,
+                                    galleryIndex,
+                                    "title",
+                                    event.target.value,
+                                  )
+                                }
+                              />
+                            </Field>
+                            <Field label="Image description">
+                              <Textarea
+                                className="min-h-24"
+                                value={galleryItem.description}
+                                onChange={(event) =>
+                                  updateProjectGalleryItem(
+                                    index,
+                                    galleryIndex,
+                                    "description",
+                                    event.target.value,
+                                  )
+                                }
+                              />
+                            </Field>
+                          </div>
+                        </EditableCard>
+                      ))}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          const items = [...content.projects.items]
+                          items[index] = {
+                            ...items[index],
+                            gallery: [
+                              ...items[index].gallery,
+                              {
+                                id: createId("gallery"),
+                                image: project.image,
+                                title: "New gallery image",
+                                description: "Describe what is shown in this image.",
+                              },
+                            ],
+                          }
+                          setContent({ ...content, projects: { ...content.projects, items } })
+                        }}
+                      >
+                        Add Gallery Image
+                      </Button>
                     </div>
                   </EditableCard>
                 ))}
@@ -353,11 +469,22 @@ export function AdminDashboard({ initialContent, userEmail }: Props) {
                           ...content.projects.items,
                           {
                             id: createId("project"),
+                            slug: createId("project"),
                             title: "New Project",
                             location: "City, Country",
                             year: "2026",
                             image: "/images/project-cliff-house.jpg",
                             href: "#",
+                            summary: "Short project summary.",
+                            description: "Longer project description.",
+                            gallery: [
+                              {
+                                id: createId("gallery"),
+                                image: "/images/project-cliff-house.jpg",
+                                title: "Main image",
+                                description: "Describe this image.",
+                              },
+                            ],
                           },
                         ],
                       },

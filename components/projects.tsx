@@ -27,7 +27,7 @@ export function Projects({ content }: ProjectsProps) {
           </h2>
         </div>
         <Link
-          href="#"
+          href="/#projects"
           className="hidden md:block text-xs tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors uppercase border-b border-muted-foreground hover:border-foreground pb-1"
         >
           {content.ctaLabel}
@@ -115,7 +115,7 @@ export function Projects({ content }: ProjectsProps) {
 
       <div className="mt-16 md:hidden text-center">
         <Link
-          href="#"
+          href="/#projects"
           className="text-xs tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors uppercase border-b border-muted-foreground hover:border-foreground pb-1"
         >
           {content.ctaLabel}
