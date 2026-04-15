@@ -11,23 +11,22 @@ const navLinks = [
   { href: "#contact", label: "Contact" },
 ]
 
-export function Header() {
+type HeaderProps = {
+  siteName: string
+}
+
+export function Header({ siteName }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-sm">
       <nav className="flex items-center justify-between px-6 md:px-12 lg:px-20 py-6">
-        {/* Logo */}
-        <Link 
-          href="/" 
-          className="hover:opacity-60 transition-opacity"
-        >
+        <Link href="/" className="hover:opacity-60 transition-opacity">
           <span className="text-base md:text-lg lg:text-xl tracking-[0.3em] font-light text-foreground">
-            RARCHITECTS
+            {siteName}
           </span>
         </Link>
 
-        {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-12">
           {navLinks.map((link) => (
             <Link
@@ -40,7 +39,6 @@ export function Header() {
           ))}
         </div>
 
-        {/* Mobile Menu Button */}
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           className="md:hidden p-2 -mr-2 text-foreground"
@@ -50,7 +48,6 @@ export function Header() {
         </button>
       </nav>
 
-      {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-background border-t border-border">
           <div className="flex flex-col py-8 px-6">
