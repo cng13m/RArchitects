@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { createClient as createSupabaseBrowserClient } from "@/lib/supabase/client"
 import type { SiteContent } from "@/lib/site-content"
 
 type Props = {
@@ -19,11 +20,19 @@ function createId(prefix: string) {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}`
 }
 
+const STORAGE_BUCKET = "site-images"
+
+function sanitizeFileName(fileName: string) {
+  return fileName.toLowerCase().replace(/[^a-z0-9.-]+/g, "-")
+}
+
 export function AdminDashboard({ initialContent, userEmail }: Props) {
   const [content, setContent] = useState(initialContent)
   const [isSaving, setIsSaving] = useState(false)
+  const [uploadingField, setUploadingField] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const supabase = createSupabaseBrowserClient()
 
   async function saveContent() {
     setIsSaving(true)
@@ -50,6 +59,34 @@ export function AdminDashboard({ initialContent, userEmail }: Props) {
 
     setMessage("Website content saved.")
     setIsSaving(false)
+  }
+
+  async function uploadImage(file: File, folder: string, fieldId: string) {
+    setUploadingField(fieldId)
+    setError(null)
+    setMessage(null)
+
+    const filePath = `${folder}/${Date.now()}-${sanitizeFileName(file.name)}`
+    const { error: uploadError } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .upload(filePath, file, {
+        cacheControl: "3600",
+        upsert: false,
+      })
+
+    if (uploadError) {
+      setUploadingField(null)
+      setError(uploadError.message)
+      return null
+    }
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(filePath)
+
+    setUploadingField(null)
+    setMessage("Image uploaded. Save changes to publish it on the website.")
+    return publicUrl
   }
 
   function updateProject(
@@ -157,14 +194,18 @@ export function AdminDashboard({ initialContent, userEmail }: Props) {
             </CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-2">
               <Field label="Image path or URL">
-                <Input
+                <ImageField
+                  fieldId="hero-image"
+                  folder="hero"
                   value={content.hero.image}
-                  onChange={(event) =>
+                  uploadingField={uploadingField}
+                  onChange={(value) =>
                     setContent({
                       ...content,
-                      hero: { ...content.hero, image: event.target.value },
+                      hero: { ...content.hero, image: value },
                     })
                   }
+                  onUpload={uploadImage}
                 />
               </Field>
               <Field label="Image alt text">
@@ -282,11 +323,13 @@ export function AdminDashboard({ initialContent, userEmail }: Props) {
                         />
                       </Field>
                       <Field label="Image path or URL">
-                        <Input
+                        <ImageField
+                          fieldId={`project-image-${project.id}`}
+                          folder="projects"
                           value={project.image}
-                          onChange={(event) =>
-                            updateProject(index, "image", event.target.value)
-                          }
+                          uploadingField={uploadingField}
+                          onChange={(value) => updateProject(index, "image", value)}
+                          onUpload={uploadImage}
                         />
                       </Field>
                       <Field label="Project link">
@@ -368,14 +411,18 @@ export function AdminDashboard({ initialContent, userEmail }: Props) {
                   />
                 </Field>
                 <Field label="Image path or URL">
-                  <Input
+                  <ImageField
+                    fieldId="studio-image"
+                    folder="studio"
                     value={content.studio.image}
-                    onChange={(event) =>
+                    uploadingField={uploadingField}
+                    onChange={(value) =>
                       setContent({
                         ...content,
-                        studio: { ...content.studio, image: event.target.value },
+                        studio: { ...content.studio, image: value },
                       })
                     }
+                    onUpload={uploadImage}
                   />
                 </Field>
                 <Field label="Image alt text">
@@ -756,6 +803,54 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <span>{label}</span>
       {children}
     </label>
+  )
+}
+
+function ImageField({
+  fieldId,
+  folder,
+  value,
+  uploadingField,
+  onChange,
+  onUpload,
+}: {
+  fieldId: string
+  folder: string
+  value: string
+  uploadingField: string | null
+  onChange: (value: string) => void
+  onUpload: (file: File, folder: string, fieldId: string) => Promise<string | null>
+}) {
+  const isUploading = uploadingField === fieldId
+
+  return (
+    <div className="space-y-3">
+      <Input value={value} onChange={(event) => onChange(event.target.value)} />
+      <div className="flex flex-wrap items-center gap-3">
+        <Input
+          type="file"
+          accept="image/*"
+          className="max-w-sm"
+          disabled={isUploading}
+          onChange={async (event) => {
+            const file = event.target.files?.[0]
+            if (!file) {
+              return
+            }
+
+            const uploadedUrl = await onUpload(file, folder, fieldId)
+            if (uploadedUrl) {
+              onChange(uploadedUrl)
+            }
+
+            event.target.value = ""
+          }}
+        />
+        <span className="text-xs text-muted-foreground">
+          {isUploading ? "Uploading..." : "Or upload a new image from your device."}
+        </span>
+      </div>
+    </div>
   )
 }
 
