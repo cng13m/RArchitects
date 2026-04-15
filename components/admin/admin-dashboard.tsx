@@ -637,7 +637,7 @@ export function AdminDashboard({ initialContent, userEmail }: Props) {
               <div className="space-y-4">
                 <h3 className="text-sm font-medium">Address Lines</h3>
                 {content.contact.addressLines.map((line, index) => (
-                  <div key={`${line}-${index}`} className="flex gap-3">
+                  <div key={`address-line-${index}`} className="flex gap-3">
                     <Input
                       value={line}
                       onChange={(event) => {
