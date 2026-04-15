@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useState } from "react"
 
+import { Reveal } from "@/components/reveal"
 import type { SiteContent } from "@/lib/site-content"
 
 type NewsProps = {
@@ -15,7 +16,7 @@ export function News({ content }: NewsProps) {
 
   return (
     <section id="news" className="py-32 px-6 md:px-12 lg:px-20">
-      <div className="flex items-end justify-between mb-16">
+      <Reveal className="mb-16 flex items-end justify-between">
         <div>
           <p className="text-xs tracking-[0.3em] text-muted-foreground uppercase mb-4">
             {content.eyebrow}
@@ -29,11 +30,12 @@ export function News({ content }: NewsProps) {
             {content.ctaLabel}
           </span>
         ) : null}
-      </div>
+      </Reveal>
 
       <div className="border-t border-border">
-        {content.items.map((item) => (
-          <Link
+        {content.items.map((item, index) => (
+          <Reveal key={item.id} delay={index * 90}>
+            <Link
             key={item.id}
             href={item.href}
             className="group block border-b border-border py-8 md:py-10"
@@ -65,17 +67,18 @@ export function News({ content }: NewsProps) {
                   Read -&gt;
                 </span>
               </div>
-            </div>
-          </Link>
+              </div>
+            </Link>
+          </Reveal>
         ))}
       </div>
 
       {hasNewsListing ? (
-        <div className="mt-12 md:hidden text-center">
+        <Reveal className="mt-12 text-center md:hidden" delay={320}>
           <span className="text-xs tracking-[0.2em] text-muted-foreground uppercase border-b border-muted-foreground pb-1">
             {content.ctaLabel}
           </span>
-        </div>
+        </Reveal>
       ) : null}
     </section>
   )

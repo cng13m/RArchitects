@@ -4,6 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
 
+import { Reveal } from "@/components/reveal"
 import type { SiteContent } from "@/lib/site-content"
 
 type ProjectsProps = {
@@ -17,7 +18,7 @@ export function Projects({ content }: ProjectsProps) {
 
   return (
     <section id="projects" className="py-32 px-6 md:px-12 lg:px-20">
-      <div className="flex items-end justify-between mb-20">
+      <Reveal className="mb-20 flex items-end justify-between">
         <div>
           <p className="text-xs tracking-[0.3em] text-muted-foreground uppercase mb-4">
             {content.eyebrow}
@@ -32,50 +33,55 @@ export function Projects({ content }: ProjectsProps) {
         >
           {content.ctaLabel}
         </Link>
-      </div>
+      </Reveal>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
         {leadProjects.map((project, index) => (
-          <Link
+          <Reveal
             key={project.id}
-            href={project.href}
-            className={`group block ${index === 0 ? "md:col-span-2" : ""}`}
-            onMouseEnter={() => setHoveredId(project.id)}
-            onMouseLeave={() => setHoveredId(null)}
+            delay={index * 110}
+            className={index === 0 ? "md:col-span-2" : ""}
           >
-            <div className={`relative overflow-hidden ${index === 0 ? "aspect-[16/9]" : "aspect-[4/3]"}`}>
-              <Image
-                src={project.image}
-                alt={project.title}
-                fill
-                unoptimized
-                className={`object-cover transition-transform duration-700 ${
-                  hoveredId === project.id ? "scale-105" : "scale-100"
-                }`}
-              />
-              <div className={`absolute inset-0 bg-black transition-opacity duration-500 ${
-                hoveredId === project.id ? "opacity-20" : "opacity-0"
-              }`} />
-            </div>
-            <div className="mt-6 flex items-start justify-between">
-              <div>
-                <h3 className="font-serif text-xl md:text-2xl font-light tracking-tight mb-2">
-                  {project.title}
-                </h3>
-                <p className="text-xs tracking-[0.15em] text-muted-foreground uppercase">
-                  {project.location}
-                </p>
+            <Link
+              href={project.href}
+              className="group block"
+              onMouseEnter={() => setHoveredId(project.id)}
+              onMouseLeave={() => setHoveredId(null)}
+            >
+              <div className={`relative overflow-hidden ${index === 0 ? "aspect-[16/9]" : "aspect-[4/3]"}`}>
+                <Image
+                  src={project.image}
+                  alt={project.title}
+                  fill
+                  unoptimized
+                  className={`object-cover transition-transform duration-700 ${
+                    hoveredId === project.id ? "scale-105" : "scale-100"
+                  }`}
+                />
+                <div className={`absolute inset-0 bg-black transition-opacity duration-500 ${
+                  hoveredId === project.id ? "opacity-20" : "opacity-0"
+                }`} />
               </div>
-              <span className="text-xs tracking-[0.1em] text-muted-foreground">
-                {project.year}
-              </span>
-            </div>
-          </Link>
+              <div className="mt-6 flex items-start justify-between">
+                <div>
+                  <h3 className="font-serif text-xl md:text-2xl font-light tracking-tight mb-2">
+                    {project.title}
+                  </h3>
+                  <p className="text-xs tracking-[0.15em] text-muted-foreground uppercase">
+                    {project.location}
+                  </p>
+                </div>
+                <span className="text-xs tracking-[0.1em] text-muted-foreground">
+                  {project.year}
+                </span>
+              </div>
+            </Link>
+          </Reveal>
         ))}
       </div>
 
       {spotlightProject ? (
-        <div className="mt-12">
+        <Reveal className="mt-12" delay={360}>
           <Link
             href={spotlightProject.href}
             className="group block"
@@ -110,17 +116,17 @@ export function Projects({ content }: ProjectsProps) {
               </span>
             </div>
           </Link>
-        </div>
+        </Reveal>
       ) : null}
 
-      <div className="mt-16 md:hidden text-center">
+      <Reveal className="mt-16 text-center md:hidden" delay={420}>
         <Link
           href="/#projects"
           className="text-xs tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors uppercase border-b border-muted-foreground hover:border-foreground pb-1"
         >
           {content.ctaLabel}
         </Link>
-      </div>
+      </Reveal>
     </section>
   )
 }
