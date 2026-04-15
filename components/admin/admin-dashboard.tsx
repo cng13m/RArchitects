@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 
 import { logout } from "@/app/admin/login/actions"
 import { Button } from "@/components/ui/button"
@@ -825,6 +826,19 @@ function ImageField({
   return (
     <div className="space-y-3">
       <Input value={value} onChange={(event) => onChange(event.target.value)} />
+      {value ? (
+        <div className="overflow-hidden rounded-lg border border-border bg-muted/20">
+          <div className="relative aspect-[16/9] w-full max-w-xl">
+            <Image
+              src={value}
+              alt="Selected admin image preview"
+              fill
+              unoptimized
+              className="object-cover"
+            />
+          </div>
+        </div>
+      ) : null}
       <div className="flex flex-wrap items-center gap-3">
         <Input
           type="file"
